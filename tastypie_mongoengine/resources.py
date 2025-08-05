@@ -1,11 +1,18 @@
 import itertools
 import re
 import sys
+from collections import OrderedDict
 
 from django import urls
 from django.core import exceptions
 from django.db.models import base as models_base
-from django.utils import datastructures
+
+# Django 4.0+ removed SortedDict, use OrderedDict instead
+try:
+    from django.utils import datastructures
+    SortedDict = datastructures.SortedDict
+except (ImportError, AttributeError):
+    SortedDict = OrderedDict
 
 try:
     # Django 1.5+
@@ -51,7 +58,7 @@ class NOT_HYDRATED(object):
     pass
 
 
-class ListQuerySet(datastructures.SortedDict):
+class ListQuerySet(SortedDict):
     # Workaround for https://github.com/toastdriven/django-tastypie/pull/670
     query = Query()
 
@@ -130,7 +137,7 @@ class ListQuerySet(datastructures.SortedDict):
         return self.values()
 
     def __reversed__(self):
-        for key in reversed(self.keyOrder):
+        for key in reversed(list(self.keys())):
             yield self[key]
 
     def __getitem__(self, key):
