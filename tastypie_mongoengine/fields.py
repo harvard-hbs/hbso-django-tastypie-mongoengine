@@ -185,7 +185,7 @@ class EmbeddedListField(BuildRelatedMixin, fields.ToManyField):
 
         the_m2ms = None
 
-        if isinstance(self.attribute, basestring):
+        if isinstance(self.attribute, str):
             the_m2ms = getattr(bundle.obj, self.attribute)
         elif callable(self.attribute):
             the_m2ms = self.attribute(bundle)
@@ -275,7 +275,7 @@ class ReferencedListField(TastypieMongoengineMixin, fields.ToManyField):
 
         the_m2ms = None
 
-        if isinstance(self.attribute, basestring):
+        if isinstance(self.attribute, str):
             the_m2ms = getattr(bundle.obj, self.attribute)
         elif callable(self.attribute):
             the_m2ms = self.attribute(bundle)
