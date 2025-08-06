@@ -734,6 +734,12 @@ class MongoEngineResource(resources.ModelResource, metaclass=MongoEngineModelDec
                 'help_text': getattr(f, 'help_text', ''),
             }
 
+            # Special handling for ReferenceField - it needs a 'to' parameter
+            if isinstance(f, mongoengine.ReferenceField):
+                # For now, we'll use a placeholder. In a real implementation,
+                # this would need to be resolved to the appropriate resource class
+                kwargs['to'] = 'self'  # This will need to be resolved later
+
             # If field is not required, it does not matter if set default value,
             # so we do
             if not f.required:
