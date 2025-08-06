@@ -280,6 +280,28 @@ class MongoEngineResource(resources.ModelResource, metaclass=MongoEngineModelDec
     Adaptation of ``ModelResource`` to MongoEngine.
     """
 
+    @property
+    def urls(self):
+        """
+        The endpoints this ``Resource`` responds to.
+        
+        Mostly a standard URLconf, this is suitable for either automatic use
+        when registered with an ``Api`` class or for including directly in
+        a URLconf should you choose to.
+        """
+        urls = self.prepend_urls()
+        
+        # Check if override_urls exists and is not deprecated
+        if hasattr(self, 'override_urls'):
+            overridden_urls = self.override_urls()
+            if overridden_urls:
+                import warnings
+                warnings.warn("'override_urls' is a deprecated method & will be removed by v1.0.0. Please rename your method to ``prepend_urls``.")
+                urls += overridden_urls
+        
+        urls += self.base_urls()
+        return urls
+
     def get_via_uri(self, uri, request=None):
         """
         This pulls apart the salient bits of the URI and populates the
