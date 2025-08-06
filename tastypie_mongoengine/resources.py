@@ -275,12 +275,10 @@ class MongoEngineModelDeclarativeMetaclass(resources.ModelDeclarativeMetaclass):
         return new_class
 
 
-class MongoEngineResource(resources.ModelResource):
+class MongoEngineResource(resources.ModelResource, metaclass=MongoEngineModelDeclarativeMetaclass):
     """
     Adaptation of ``ModelResource`` to MongoEngine.
     """
-
-    __metaclass__ = MongoEngineModelDeclarativeMetaclass
 
     def get_via_uri(self, uri, request=None):
         """
