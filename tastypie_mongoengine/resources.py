@@ -206,8 +206,8 @@ class MongoEngineModelDeclarativeMetaclass(resources.ModelDeclarativeMetaclass):
                     setattr(meta, 'queryset', ListQuerySet())
 
         new_class = super(resources.ModelDeclarativeMetaclass, cls).__new__(cls, name, bases, attrs)
-        include_fields = getattr(new_class._meta, 'fields', [])
-        excludes = getattr(new_class._meta, 'excludes', [])
+        include_fields = getattr(new_class._meta, 'fields', []) or []
+        excludes = getattr(new_class._meta, 'excludes', []) or []
 
         field_names = list(new_class.base_fields.keys())
 
@@ -223,9 +223,9 @@ class MongoEngineModelDeclarativeMetaclass(resources.ModelDeclarativeMetaclass):
                     del(new_class.base_fields[field_name])
             if field_name in new_class.declared_fields:
                 continue
-            if len(include_fields) and field_name not in include_fields:
+            if include_fields and field_name not in include_fields:
                 del(new_class.base_fields[field_name])
-            if len(excludes) and field_name in excludes:
+            if excludes and field_name in excludes:
                 del(new_class.base_fields[field_name])
 
         # Add in the new fields
