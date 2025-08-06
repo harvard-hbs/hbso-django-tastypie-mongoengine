@@ -675,7 +675,7 @@ class MongoEngineResource(resources.ModelResource, metaclass=MongoEngineModelDec
         elif isinstance(f, mongoengine.GeoPointField):
             result = tastypie_fields.ListField
         elif isinstance(f, mongoengine.ObjectIdField):
-            result = tastypie_mongoengine_fields.ObjectIdField
+            result = tastypie_mongoengine_fields.ObjectId
         elif isinstance(f, mongoengine.EmbeddedDocumentField):
             result = tastypie_mongoengine_fields.EmbeddedDocumentField
         elif isinstance(f, mongoengine.ReferenceField):
