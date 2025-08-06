@@ -43,7 +43,7 @@ if __name__ == '__main__':
         python_requires='>=3.11',
         install_requires = (
             'Django>=5.0,<6.0',
-            'django-tastypie>=0.14.0,<0.15.0',
+            'django-tastypie>=0.14.0,<0.16.0',
             'mongoengine>=0.28.0',
             'python-dateutil>=2.8.0',
             'lxml>=4.9.0',
@@ -55,7 +55,7 @@ if __name__ == '__main__':
         test_suite = 'tests.runtests.runtests',
         tests_require = (
             'Django>=5.0,<6.0',
-            'django-tastypie>=0.14.0,<0.15.0',
+            'django-tastypie>=0.14.0,<0.16.0',
             'mongoengine>=0.28.0',
             'python-dateutil>=2.8.0',
             'lxml>=4.9.0',
