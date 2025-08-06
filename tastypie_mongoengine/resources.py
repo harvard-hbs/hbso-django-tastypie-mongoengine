@@ -684,9 +684,82 @@ class MongoEngineResource(resources.ModelResource, metaclass=MongoEngineModelDec
         return result
 
     @classmethod
+    def api_field_options(cls, name, field, options):
+        """
+        Allows dynamic change of field options when creating resource
+        fields from document fields automatically.
+        """
+
+        return options
+
+    @classmethod
     def get_fields(cls, fields=None, excludes=None):
         """
         Given any explicit fields to include and fields to exclude, add
-        additional fields based on the associated model.
+        additional fields based on the associated document.
         """
+
         final_fields = {}
+        fields = fields or []
+        excludes = excludes or []
+
+        if not cls._meta.object_class:
+            return final_fields
+
+        for name, f in cls._meta.object_class._fields.items():
+            # If the field name is already present, skip
+            if name in cls.base_fields:
+                continue
+
+            # If field is not present in explicit field listing, skip
+            if fields and name not in fields:
+                continue
+
+            # If field is in exclude list, skip
+            if excludes and name in excludes:
+                continue
+
+            # TODO: Might need it in the future
+            # if cls.should_skip_field(f):
+            #     continue
+
+            api_field_class = cls.api_field_from_mongo_field(f)
+
+            primary_key = f.primary_key or name == getattr(cls._meta, 'id_field', 'id')
+
+            kwargs = {
+                'attribute': name,
+                'unique': f.unique or primary_key,
+                'null': not f.required and not primary_key,
+                'help_text': f.help_text,
+            }
+
+            # If field is not required, it does not matter if set default value,
+            # so we do
+            if not f.required:
+                kwargs['default'] = f.default
+            else:
+                # MongoEngine does not really differ between user-specified default
+                # and its default, so we try to guess
+                if isinstance(f, mongoengine.ListField):
+                    if not callable(f.default) or f.default() != []: # If not MongoEngine's default
+                        kwargs['default'] = f.default
+                elif isinstance(f, mongoengine.DictField):
+                    if not callable(f.default) or f.default() != {}: # If not MongoEngine's default
+                        kwargs['default'] = f.default
+                else:
+                    if f.default is not None: # If not MongoEngine's default
+                        kwargs['default'] = f.default
+
+            kwargs = cls.api_field_options(name, f, kwargs)
+
+            final_fields[name] = api_field_class(**kwargs)
+            final_fields[name].instance_name = name
+            final_fields[name]._primary_key = primary_key
+
+            # We store MongoEngine field so that schema output can show
+            # to which content the list is limited to (if any)
+            if isinstance(f, mongoengine.ListField):
+                final_fields[name].field = f.field
+
+        return final_fields
