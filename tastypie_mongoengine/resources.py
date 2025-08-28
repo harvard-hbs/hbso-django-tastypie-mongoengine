@@ -646,6 +646,41 @@ class MongoEngineResource(resources.ModelResource, metaclass=MongoEngineModelDec
         except mongoengine.ValidationError as ex:
             raise exceptions.ValidationError(str(ex))
 
+    def build_filters(self, filters=None, ignore_bad_filters=False):
+        """
+        Override build_filters to handle MongoEngine's field structure.
+        MongoEngine uses _fields dict instead of Django's _meta.get_field method.
+        """
+        if filters is None:
+            filters = {}
+
+        applicable_filters = {}
+
+        for filter_expr, value in filters.items():
+            filter_bits = filter_expr.split(constants.LOOKUP_SEP)
+            field_name = filter_bits.pop(0)
+            filter_type = 'exact'
+
+            if len(filter_bits) and filter_bits[-1] in QUERY_TERMS_ALL:
+                filter_type = filter_bits.pop()
+
+            lookup_bits = filter_bits[:]
+
+            # Check if the field exists in MongoEngine document
+            if hasattr(self._meta.object_class, '_fields') and field_name in self._meta.object_class._fields:
+                applicable_filters[filter_expr] = value
+            elif field_name in self.fields:
+                # Field exists in resource fields
+                applicable_filters[filter_expr] = value
+            elif ignore_bad_filters:
+                # Skip bad filters if ignore_bad_filters is True
+                continue
+            else:
+                # Raise error for unknown fields
+                raise tastypie_exceptions.InvalidFilterError("The '%s' field does not exist." % field_name)
+
+        return applicable_filters
+
     def save_m2m(self, bundle):
         # Our related documents are not stored in a queryset, but a list,
         # so we have to manually build a list, set it, and save
