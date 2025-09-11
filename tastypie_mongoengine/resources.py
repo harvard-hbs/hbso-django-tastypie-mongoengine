@@ -289,18 +289,22 @@ class MongoEngineResource(resources.ModelResource, metaclass=MongoEngineModelDec
         when registered with an ``Api`` class or for including directly in
         a URLconf should you choose to.
         """
-        urls = self.prepend_urls()
-        
-        # Check if override_urls exists and is not deprecated
-        if hasattr(self, 'override_urls'):
-            overridden_urls = self.override_urls()
-            if overridden_urls:
-                import warnings
-                warnings.warn("'override_urls' is a deprecated method & will be removed by v1.0.0. Please rename your method to ``prepend_urls``.")
-                urls += overridden_urls
-        
-        urls += self.base_urls()
-        return urls
+        try:
+            urls = self.prepend_urls()
+            
+            # Check if override_urls exists and is not deprecated
+            if hasattr(self, 'override_urls'):
+                overridden_urls = self.override_urls()
+                if overridden_urls:
+                    import warnings
+                    warnings.warn("'override_urls' is a deprecated method & will be removed by v1.0.0. Please rename your method to ``prepend_urls``.")
+                    urls += overridden_urls
+            
+            urls += self.base_urls()
+            return urls
+        except Exception as e:
+            # Fallback to parent class implementation if there's an error
+            return super(MongoEngineResource, self).urls
 
     def get_via_uri(self, uri, request=None):
         """
