@@ -230,7 +230,9 @@ class EmbeddedListField(BuildRelatedMixin, fields.ToManyField):
             from tastypie_mongoengine import resources
             base = super(EmbeddedListField, self).to_class
             # We create a new ad-hoc resource class here, mixed with MongoEngineListResource, pretending to be original class
-            self._to_class_with_listresource = type(base.__name__, (base, resources.MongoEngineListResource), {
+            # NOTE: edit to fix PD-30914 (kbh)
+            # self._to_class_with_listresource = type(base.__name__, (base, resources.MongoEngineListResource), {
+            self._to_class_with_listresource = type(base.__name__, (base, resources.MongoEngineResource), {
                 '__module__': base.__module__,
                 '_parent': self._resource,
                 'attribute': self.attribute or self.instance_name,
