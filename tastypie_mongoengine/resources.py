@@ -62,6 +62,14 @@ class ListQuerySet(SortedDict):
     # Workaround for https://github.com/toastdriven/django-tastypie/pull/670
     query = Query()
 
+    def clone(self):
+        """
+        Return a copy of this ListQuerySet.
+        Required for Django 4.2+ compatibility.
+        """
+        cloned = ListQuerySet(self)
+        return cloned
+
     def _process_filter_value(self, value):
         # Sometimes value is passed as a list of one value
         # (if filter was converted from QueryDict, for example)
