@@ -370,10 +370,12 @@ class MongoEngineResource(resources.ModelResource, metaclass=MongoEngineModelDec
         are imported, but then database connection is changed to test database.
         """
 
-        self._meta.queryset._document._collection = None
-        self._meta.queryset._collection_obj = self._meta.queryset._document._get_collection()
-        if hasattr(self._meta.queryset, '_reset_already_indexed'):
-            self._meta.queryset._reset_already_indexed()
+        # Check if queryset has _document attribute (ListQuerySet doesn't have it)
+        if hasattr(self._meta.queryset, '_document'):
+            self._meta.queryset._document._collection = None
+            self._meta.queryset._collection_obj = self._meta.queryset._document._get_collection()
+            if hasattr(self._meta.queryset, '_reset_already_indexed'):
+                self._meta.queryset._reset_already_indexed()
 
     def get_object_list(self, request):
         """
