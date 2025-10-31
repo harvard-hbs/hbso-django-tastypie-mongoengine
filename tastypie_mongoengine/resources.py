@@ -74,7 +74,10 @@ class ListQuerySet(SortedDict):
         # Sometimes value is passed as a list of one value
         # (if filter was converted from QueryDict, for example)
         if isinstance(value, (list, tuple)):
-            assert len(value) == 1
+            # Handle empty lists
+            if len(value) == 0:
+                return None
+            # Return first element if list has one or more items
             return value[0]
         else:
             return value
