@@ -145,7 +145,7 @@ class ListQuerySet(SortedDict):
         return ListQuerySet(result)
 
     def __iter__(self):
-        return self.values()
+        return iter(self.values())
 
     def __reversed__(self):
         for key in reversed(list(self.keys())):
