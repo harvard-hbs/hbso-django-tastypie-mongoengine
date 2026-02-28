@@ -185,7 +185,7 @@ class EmbeddedListField(BuildRelatedMixin, fields.ToManyField):
 
         the_m2ms = None
 
-        if isinstance(self.attribute, basestring):
+        if isinstance(self.attribute, str):
             the_m2ms = getattr(bundle.obj, self.attribute)
         elif callable(self.attribute):
             the_m2ms = self.attribute(bundle)
@@ -211,7 +211,9 @@ class EmbeddedListField(BuildRelatedMixin, fields.ToManyField):
 
             m2m_bundle = tastypie_bundle.Bundle(obj=m2m, request=bundle.request)
             self.m2m_resources.append(m2m_resource)
-            if tastypie.__version__ >= (0, 9, 15):
+            # Convert version string to tuple for comparison (Python 3.12 compatibility)
+            version_parts = tuple(map(int, tastypie.__version__.split('.')))
+            if version_parts >= (0, 9, 15):
                 m2m_dehydrated.append(self.dehydrate_related(m2m_bundle, m2m_resource, for_list=for_list))
             else:
                 m2m_dehydrated.append(self.dehydrate_related(m2m_bundle, m2m_resource))
@@ -228,7 +230,9 @@ class EmbeddedListField(BuildRelatedMixin, fields.ToManyField):
             from tastypie_mongoengine import resources
             base = super(EmbeddedListField, self).to_class
             # We create a new ad-hoc resource class here, mixed with MongoEngineListResource, pretending to be original class
-            self._to_class_with_listresource = type(base.__name__, (base, resources.MongoEngineListResource), {
+            # NOTE: edit to fix PD-30914 (kbh)
+            # self._to_class_with_listresource = type(base.__name__, (base, resources.MongoEngineListResource), {
+            self._to_class_with_listresource = type(base.__name__, (base, resources.MongoEngineResource), {
                 '__module__': base.__module__,
                 '_parent': self._resource,
                 'attribute': self.attribute or self.instance_name,
@@ -275,7 +279,7 @@ class ReferencedListField(TastypieMongoengineMixin, fields.ToManyField):
 
         the_m2ms = None
 
-        if isinstance(self.attribute, basestring):
+        if isinstance(self.attribute, str):
             the_m2ms = getattr(bundle.obj, self.attribute)
         elif callable(self.attribute):
             the_m2ms = self.attribute(bundle)
@@ -293,7 +297,9 @@ class ReferencedListField(TastypieMongoengineMixin, fields.ToManyField):
             m2m_resource = self.get_related_resource(m2m)
             m2m_bundle = tastypie_bundle.Bundle(obj=m2m, request=bundle.request)
             self.m2m_resources.append(m2m_resource)
-            if tastypie.__version__ >= (0, 9, 15):
+            # Convert version string to tuple for comparison (Python 3.12 compatibility)
+            version_parts = tuple(map(int, tastypie.__version__.split('.')))
+            if version_parts >= (0, 9, 15):
                 m2m_dehydrated.append(self.dehydrate_related(m2m_bundle, m2m_resource, for_list=for_list))
             else:
                 m2m_dehydrated.append(self.dehydrate_related(m2m_bundle, m2m_resource))
